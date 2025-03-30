@@ -20,9 +20,9 @@ class HomeViewController: UIViewController {
         }
         presenter.onMessageAddedCallback = { [weak self] in
             self?.mainTableView.insertRows(at: [IndexPath(row: .zero, section: .zero)], with: .automatic)
-            self?.selectedPicturesCollectionView.reloadData()
         }
         presenter.onChangeSelectedImagesCallback = { [weak self] in
+            self?.hideSelectedImagesIfNeeded()
             self?.selectedPicturesCollectionView.reloadData()
         }
         
@@ -68,6 +68,7 @@ class HomeViewController: UIViewController {
         selectedPicturesFlowLayout.minimumInteritemSpacing = 10
         selectedPicturesCollectionView.collectionViewLayout = selectedPicturesFlowLayout
         selectedPicturesCollectionView.showsHorizontalScrollIndicator = false
+        hideSelectedImagesIfNeeded()
         
         selectedPicturesCollectionView.dataSource = self
         selectedPicturesCollectionView.delegate = self
@@ -107,6 +108,10 @@ class HomeViewController: UIViewController {
         presenter.addNewMessage(message: messageText)
         mainTextField.text = ""
         mainTextField.resignFirstResponder()
+    }
+    
+    private func hideSelectedImagesIfNeeded() {
+        selectedPicturesCollectionView.isHidden = presenter.selectedImagesURL.isEmpty
     }
 }
 
@@ -170,13 +175,7 @@ extension HomeViewController: UICollectionViewDelegate {
 
 extension HomeViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if !presenter.selectedImagesURL.isEmpty {
-            collectionView.isHidden = false
-            return presenter.selectedImagesURL.count
-        } else {
-            collectionView.isHidden = true
-            return 0
-        }
+        return presenter.selectedImagesURL.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {

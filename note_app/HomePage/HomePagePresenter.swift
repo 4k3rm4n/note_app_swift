@@ -59,7 +59,8 @@ class HomePagePresenter {
         selectedImagesURL.forEach { url in
             removeFileFromTmpDirectory(by: url)
         }
-        selectedImagesURL.removeAll()
+        selectedImagesURL = []
+        onChangeSelectedImagesCallback?()
     }
     
     func selectImage(with url: URL) {
