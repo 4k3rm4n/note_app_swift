@@ -185,3 +185,24 @@ extension HomeViewController: UICollectionViewDataSource {
         return cell
     }
 }
+
+extension UIImage {
+    /// Creates a thumbnail of the image while preserving its aspect ratio.
+    func thumbnailOfSize(_ targetSize: CGSize) -> UIImage? {
+        // Calculate the scaling ratio to maintain aspect ratio
+        let widthRatio = targetSize.width / size.width
+        let heightRatio = targetSize.height / size.height
+        let scaleFactor = min(widthRatio, heightRatio) // Scale to fit the target size
+        
+        // Calculate the new size
+        let newSize = CGSize(width: size.width * scaleFactor, height: size.height * scaleFactor)
+        
+        // Use CoreGraphics to scale the image
+        UIGraphicsBeginImageContextWithOptions(newSize, false, 0.0)
+        self.draw(in: CGRect(origin: CGPoint.zero, size: newSize))
+        let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return resizedImage
+    }
+}
