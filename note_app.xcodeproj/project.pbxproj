@@ -13,6 +13,7 @@
 		43377A3D2D8581E900A8B2D8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43377A3C2D8581E900A8B2D8 /* Assets.xcassets */; };
 		43377A402D8581E900A8B2D8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43377A3E2D8581E900A8B2D8 /* LaunchScreen.storyboard */; };
 		435270022D898D660026881D /* ImageSaveService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435270012D898D660026881D /* ImageSaveService.swift */; };
+		435B821E2D99A8B8009F15BC /* RSKPlaceholderTextView in Frameworks */ = {isa = PBXBuildFile; productRef = 435B821D2D99A8B8009F15BC /* RSKPlaceholderTextView */; };
 		436821FD2D85827C005ECBFB /* HomePagePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436821FC2D85827C005ECBFB /* HomePagePresenter.swift */; };
 		436822002D85A410005ECBFB /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436821FE2D85A410005ECBFB /* HomeViewController.swift */; };
 		436822012D85A410005ECBFB /* HomeViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 436821FF2D85A410005ECBFB /* HomeViewController.xib */; };
@@ -55,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				435B821E2D99A8B8009F15BC /* RSKPlaceholderTextView in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -159,6 +161,9 @@
 			dependencies = (
 			);
 			name = note_app;
+			packageProductDependencies = (
+				435B821D2D99A8B8009F15BC /* RSKPlaceholderTextView */,
+			);
 			productName = note_app;
 			productReference = 43377A302D8581E800A8B2D8 /* note_app.app */;
 			productType = "com.apple.product-type.application";
@@ -187,6 +192,9 @@
 				Base,
 			);
 			mainGroup = 43377A272D8581E800A8B2D8;
+			packageReferences = (
+				435B821C2D99A8B8009F15BC /* XCRemoteSwiftPackageReference "RSKPlaceholderTextView" */,
+			);
 			productRefGroup = 43377A312D8581E800A8B2D8 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -441,6 +449,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		435B821C2D99A8B8009F15BC /* XCRemoteSwiftPackageReference "RSKPlaceholderTextView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ruslanskorb/RSKPlaceholderTextView";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		435B821D2D99A8B8009F15BC /* RSKPlaceholderTextView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 435B821C2D99A8B8009F15BC /* XCRemoteSwiftPackageReference "RSKPlaceholderTextView" */;
+			productName = RSKPlaceholderTextView;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 43377A282D8581E800A8B2D8 /* Project object */;
 }

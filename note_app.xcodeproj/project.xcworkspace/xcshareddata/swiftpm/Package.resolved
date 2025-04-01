@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "rskplaceholdertextview",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ruslanskorb/RSKPlaceholderTextView",
+      "state" : {
+        "revision" : "fe0f152cb4cf892cd4893fab50a61e502e5ea033",
+        "version" : "8.0.1"
+      }
+    }
+  ],
+  "version" : 2
+}

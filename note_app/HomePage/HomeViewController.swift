@@ -1,8 +1,10 @@
 import UIKit
+import RSKPlaceholderTextView
 
 class HomeViewController: UIViewController {
     
-    @IBOutlet weak var mainTextField: UITextField!
+    
+    @IBOutlet weak var mainTextView: RSKPlaceholderTextView!
     @IBOutlet weak var mainTableView: UITableView!
     @IBOutlet weak var selectedPicturesCollectionView: UICollectionView!
     let presenter = HomePagePresenter()
@@ -26,7 +28,7 @@ class HomeViewController: UIViewController {
             self?.selectedPicturesCollectionView.reloadData()
         }
         
-        setupMainTextField()
+        setupMainTextView()
         setupMainTableView()
         setupImagePicker()
         setupSelectedPicturesCollectionView()
@@ -47,11 +49,10 @@ class HomeViewController: UIViewController {
         mainTableView.delegate = self
     }
     
-    private func setupMainTextField() {
-        mainTextField.placeholder = "start typing..."
-        mainTextField.inputAccessoryView = createKeyboardToolbar()
-        mainTextField.borderStyle = .none
-        mainTextField.delegate = self
+    private func setupMainTextView() {
+        mainTextView.placeholder = "start typing..."
+        mainTextView.inputAccessoryView = createKeyboardToolbar()
+        mainTextView.borderStyle = .none
     }
     
     private func setupImagePicker() {
@@ -96,7 +97,7 @@ class HomeViewController: UIViewController {
     }
     
     @objc private func didTouchButtonCancel() {
-        mainTextField.resignFirstResponder()
+        mainTextView.resignFirstResponder()
     }
     
     @objc private func didTouchAddImageButton() {
@@ -104,10 +105,10 @@ class HomeViewController: UIViewController {
     }
     
     private func saveCurrentMessage() {
-        guard let messageText = mainTextField.text else { return }
+        guard let messageText = mainTextView.text else { return }
         presenter.addNewMessage(message: messageText)
-        mainTextField.text = ""
-        mainTextField.resignFirstResponder()
+        mainTextView.text = ""
+        mainTextView.resignFirstResponder()
     }
     
     private func hideSelectedImagesIfNeeded() {
@@ -140,13 +141,6 @@ extension HomeViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("didSelect cell at indexPath: \(indexPath)")
         tableView.deselectRow(at: indexPath, animated: true)
-    }
-}
-
-extension HomeViewController: UITextFieldDelegate {
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        saveCurrentMessage()
-        return true
     }
 }
 
@@ -192,6 +186,23 @@ extension HomeViewController: UICollectionViewDataSource {
     }
 }
 
-
-//TODO: UITextView переписати UITextField на UITextView
-
+extension UIImage {
+    /// Creates a thumbnail of the image while preserving its aspect ratio.
+    func thumbnailOfSize(_ targetSize: CGSize) -> UIImage? {
+        // Calculate the scaling ratio to maintain aspect ratio
+        let widthRatio = targetSize.width / size.width
+        let heightRatio = targetSize.height / size.height
+        let scaleFactor = min(widthRatio, heightRatio) // Scale to fit the target size
+        
+        // Calculate the new size
+        let newSize = CGSize(width: size.width * scaleFactor, height: size.height * scaleFactor)
+        
+        // Use CoreGraphics to scale the image
+        UIGraphicsBeginImageContextWithOptions(newSize, false, 0.0)
+        self.draw(in: CGRect(origin: CGPoint.zero, size: newSize))
+        let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return resizedImage
+    }
+}
