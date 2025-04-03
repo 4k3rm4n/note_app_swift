@@ -92,7 +92,6 @@ class HomeViewController: UIViewController {
     }
     
     @objc private func didTouchButtonDone() {
-        presenter.saveSelectedImages()
         saveCurrentMessage()
     }
     

@@ -10,13 +10,17 @@ import CryptoKit
 import UIKit
 
 protocol ImageSaveServiceProtocol {
-    func saveImages(with urls: [URL]) -> [String]
+    func saveImages(with urls: [URL]) -> [ImagesData]
 
 }
 
 struct ImageSaveService: ImageSaveServiceProtocol {
-    func saveImages(with urls: [URL]) -> [String] {
-        urls.compactMap{ getImageURL(with: $0)?.lastPathComponent }
+    func saveImages(with urls: [URL]) -> [ImagesData] {
+        urls.compactMap { url in
+            let (original, thumbnail) = getImageURL(with: url)
+            guard let originalName = original?.lastPathComponent, let thumbnailName = thumbnail?.lastPathComponent else { return ImagesData() }
+            return ImagesData(originalImagePath: originalName, thumbnailImagePath: thumbnailName)
+        }
     }
     
     func deleteImage(with url: URL) {
@@ -33,7 +37,6 @@ struct ImageSaveService: ImageSaveServiceProtocol {
     }
     
     static func makeImageUrl(fromImageName imageName: String) -> URL? {
-        //guard let imageName = imageName else { return nil }
         let fileManager = FileManager.default
         guard let documentDirectory = try? fileManager.url(
             for: .documentDirectory,
@@ -45,22 +48,22 @@ struct ImageSaveService: ImageSaveServiceProtocol {
         return documentDirectory.appendingPathComponent(imageName)
     }
     
-    private func getImageURL(with url: URL) -> URL? {
+    private func getImageURL(with url: URL) -> (original: URL?, thumbnail: URL?) {
         let fileManager = FileManager.default
         let image = UIImage(contentsOfFile: url.path)
-        guard let tmpFileData = image?.jpegData(compressionQuality: 1) else { return nil }
+        guard let tmpFileData = image?.jpegData(compressionQuality: 1) else { return (nil, nil) }
         
         guard let documentDirectory = try? fileManager.url(
             for: .documentDirectory,
             in: .userDomainMask,
             appropriateFor: nil,
             create: true
-        ) else { return nil }
+        ) else { return (nil, nil) }
         
         guard let directoryContents = try? fileManager.contentsOfDirectory(
             at: documentDirectory,
             includingPropertiesForKeys: nil
-        ) else { return nil }
+        ) else { return (nil, nil) }
         
         let fileUrl: URL? = directoryContents.filter { fileUrl in
             fileSize(atPath: fileUrl.path) == fileSize(atPath: url.path)
@@ -71,14 +74,20 @@ struct ImageSaveService: ImageSaveServiceProtocol {
         }.first
         
         if let fileUrl = fileUrl {
-            return fileUrl
+            let originalImageNameComponents = fileUrl.lastPathComponent.components(separatedBy: ".")
+            let thumbnailImageName = originalImageNameComponents[0] + Constants.imageThumbnailSuffix + "." + originalImageNameComponents.last!
+            let thumbnailImageURL = documentDirectory.appendingPathComponent(thumbnailImageName)
+            
+            return (fileUrl, thumbnailImageURL)
         }
         
         let destinationFileName = url.lastPathComponent
         
         let destinationURL = documentDirectory.appendingPathComponent(destinationFileName)
         
-        return copyImage(at: url, to: destinationURL)
+        guard let originalImageURL = copyImage(at: url, to: destinationURL) else { return (nil, nil) }
+        
+        return (originalImageURL, generateImageThumbnail(from: originalImageURL, thumbnailSize: CGSize(width: 100, height: 100)))
     }
     
     private func copyImage(at url: URL, to destinationURL: URL) -> URL? {
@@ -91,6 +100,29 @@ struct ImageSaveService: ImageSaveServiceProtocol {
         }
         
         return nil
+    }
+    
+    func generateImageThumbnail(from imageURL: URL, thumbnailSize: CGSize) -> URL? {
+        let fileManager = FileManager.default
+        guard let documentDirectory = try? fileManager.url(
+            for: .documentDirectory,
+            in: .userDomainMask,
+            appropriateFor: nil,
+            create: true
+        ), let image = UIImage(contentsOfFile: imageURL.path) else { return nil }
+        let thumbnailImage = image.thumbnailOfSize(thumbnailSize)
+        let imageNameComponents = imageURL.lastPathComponent.components(separatedBy: ".")
+        let imageName = imageNameComponents[0] + Constants.imageThumbnailSuffix + "." + imageNameComponents.last!
+
+        guard let thumbnailImageData = thumbnailImage?.jpegData(compressionQuality: 1) else { return nil }
+        let thumbnailImageURL = documentDirectory.appendingPathComponent("\(imageName)")
+        do {
+            try thumbnailImageData.write(to: thumbnailImageURL)
+            return thumbnailImageURL
+        } catch {
+            print("Error can not write thumbnail image to file")
+            return nil
+        }
     }
     
     func fileSize(atPath path: String) -> Int64? {
@@ -109,5 +141,12 @@ struct ImageSaveService: ImageSaveServiceProtocol {
     func sha256String(from data: Data) -> String {
         let hash = SHA256.hash(data: data)
         return hash.map { String(format: "%02x", $0) }.joined() // Convert to hex string
+    }
+}
+
+
+private extension ImageSaveService {
+    enum Constants {
+        static let imageThumbnailSuffix = "_thumbnail"
     }
 }

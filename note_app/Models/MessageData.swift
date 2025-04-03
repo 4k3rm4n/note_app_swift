@@ -11,12 +11,12 @@ struct MessageData: Codable {
     let id: UUID
     let date: Date
     let message: String
-    let imageNames: [String]?
+    let imagesData: [ImagesData]?
 
-    init(id: UUID = UUID(), date: Date = Date(), message: String, imageNames: [String]? = nil) {
+    init(id: UUID = UUID(), date: Date = Date(), message: String, imagesData: [ImagesData]? = nil) {
         self.id = id
         self.date = date
         self.message = message
-        self.imageNames = imageNames
+        self.imagesData = imagesData
     }
 }

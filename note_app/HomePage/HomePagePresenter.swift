@@ -17,7 +17,6 @@ class HomePagePresenter {
     var onChangeSelectedImagesCallback: (() -> Void)?
     let imageSaveService = ImageSaveService()
     var selectedImagesURL: [URL] = []
-    var currentImageNames: [String]?
     private let localStorageService = LocalStorageService()
     
     func setup() {
@@ -28,9 +27,12 @@ class HomePagePresenter {
         guard let indexOfItemToRemove = messagesPresentation.firstIndex(where: { $0.id == id }) else { return }
         do {
             try localStorageService.removeMessage(withID: id)
-            if let imagesURL = messagesPresentation[indexOfItemToRemove].imagesURL {
-                imagesURL.filter{ !isExistSameImageInStorage(by: $0) }
-                    .forEach{ imageSaveService.deleteImage(with: $0) }
+            if let imagesURL = messagesPresentation[indexOfItemToRemove].imagesData {
+                imagesURL.filter{ !isExistSameImageInStorage(by: $0.originalImageURL) }
+                    .forEach{
+                        imageSaveService.deleteImage(with: $0.originalImageURL)
+                        imageSaveService.deleteImage(with: $0.thumbnailImageURL)
+                    }
             }
             updateMessages()
             let indexPath = IndexPath(row: indexOfItemToRemove, section: .zero)
@@ -41,8 +43,7 @@ class HomePagePresenter {
     }
     
     func addNewMessage(message: String) {
-        let messageData = MessageData(message: message, imageNames: currentImageNames)
-        currentImageNames = nil
+        let messageData = MessageData(message: message, imagesData: saveSelectedImages())
         do {
             try localStorageService.saveMessage(message: messageData)
             updateMessages()
@@ -52,15 +53,19 @@ class HomePagePresenter {
         }
     }
     
-    func saveSelectedImages() {
+    func saveSelectedImages() -> [ImagesData]? {
+        var currentImagePairNames: [ImagesData]?
         if !selectedImagesURL.isEmpty {
-            currentImageNames = imageSaveService.saveImages(with: selectedImagesURL)
+            currentImagePairNames = imageSaveService.saveImages(with: selectedImagesURL)
+        } else {
+            currentImagePairNames = nil
         }
         selectedImagesURL.forEach { url in
             removeFileFromTmpDirectory(by: url)
         }
         selectedImagesURL = []
         onChangeSelectedImagesCallback?()
+        return currentImagePairNames
     }
     
     func selectImage(with url: URL) {
@@ -114,7 +119,9 @@ class HomePagePresenter {
     
     private func isExistSameImageInStorage(by url: URL) -> Bool {
         messagesPresentation.compactMap {
-            return $0.imagesURL?.contains(url) == true ? $0 : nil
+            return $0.imagesData?.contains(where: { imageDataPresentation in
+                imageDataPresentation.originalImageURL == url
+            }) == true ? $0 : nil
         }
         .count > 1
     }

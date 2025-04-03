@@ -30,7 +30,7 @@ class MainTableViewCell: UITableViewCell {
     }
     
     func updateView(withState state: MessagePresentation) {
-        imagesURL = state.imagesURL
+        imagesURL = state.imagesData?.map { $0.thumbnailImageURL}
         dateLabel.text = state.date
         messageLabel.text = state.message
         imageCollectionView.reloadData()
